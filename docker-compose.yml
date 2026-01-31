@@ -56,14 +56,7 @@ services:
       ]
 
   openclaw-cli:
-    build:
-      context: .
-    image: openclaw:local
-    container_name: openclaw-cli
-    network_mode: "service:tailscale-openclaw"
-    depends_on:
-      tailscale-openclaw:
-        condition: service_healthy
+    image: ${OPENCLAW_IMAGE:-openclaw:local}
     environment:
       HOME: /home/node
       TERM: xterm-256color
@@ -77,8 +70,9 @@ services:
     stdin_open: true
     tty: true
     init: true
-    entrypoint: ["node", "dist/index.js"]
-    command: ["--help"]
+    restart: unless-stopped
+    entrypoint: ["bash","-lc"]
+    command: ["sleep infinity"]
 
 volumes:
   tailscale_state_openclaw:
