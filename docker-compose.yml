@@ -70,6 +70,7 @@ services:
     stdin_open: true
     tty: true
     init: true
+    user: "0:0"
     restart: unless-stopped
     entrypoint: ["bash","-lc"]
     command: ["sleep infinity"]
