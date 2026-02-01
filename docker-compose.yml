@@ -1,9 +1,7 @@
 services:
   tailscale-openclaw:
     image: tailscale/tailscale:latest
-    container_name: tailscale-openclaw
-    hostname: super-openclaw
-    restart: unless-stopped
+    network_mode: "host"
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -12,16 +10,10 @@ services:
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
-      - TS_USERSPACE=false
       - TS_ACCEPT_DNS=true
       - TS_ACCEPT_ROUTES=false
     volumes:
       - tailscale_state_openclaw:/var/lib/tailscale
-    healthcheck:
-      test: ["CMD-SHELL", "tailscale status --json >/dev/null 2>&1 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   openclaw-gateway:
     build:
