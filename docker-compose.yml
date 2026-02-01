@@ -1,6 +1,37 @@
 services:
+  tailscale-openclaw:
+    image: tailscale/tailscale:latest
+    container_name: tailscale-openclaw
+    hostname: super-openclaw
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_ACCEPT_DNS=true
+      - TS_ACCEPT_ROUTES=false
+    volumes:
+      - tailscale_state_openclaw:/var/lib/tailscale
+    healthcheck:
+      test: ["CMD-SHELL", "tailscale status --json >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   openclaw-gateway:
-    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    build:
+      context: .
+    image: openclaw:local
+    container_name: openclaw-gateway
+    network_mode: "service:tailscale-openclaw"
+    depends_on:
+      tailscale-openclaw:
+        condition: service_healthy
     environment:
       HOME: /home/node
       TERM: xterm-256color
@@ -11,9 +42,6 @@ services:
     volumes:
       - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
-    ports:
-      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
-      - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
     init: true
     restart: unless-stopped
     command:
@@ -26,6 +54,29 @@ services:
         "--port",
         "${OPENCLAW_GATEWAY_PORT:-18789}",
       ]
+
+  openclaw-cli:
+    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      BROWSER: echo
+      CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY}
+      CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
+      CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE}
+    volumes:
+      - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+    stdin_open: true
+    tty: true
+    init: true
+    user: "0:0"
+    restart: unless-stopped
+    entrypoint: ["bash","-lc"]
+    command: ["sleep infinity"]
+
+volumes:
+  tailscale_state_openclaw:
 
   openclaw-cli:
     image: ${OPENCLAW_IMAGE:-openclaw:local}
