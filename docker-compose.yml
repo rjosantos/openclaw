@@ -14,6 +14,12 @@ services:
       - TS_ACCEPT_ROUTES=false
     volumes:
       - tailscale_state_openclaw:/var/lib/tailscale
+    healthcheck:
+      test: ["CMD-SHELL", "tailscale status --json >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
 
   openclaw-gateway:
     build:
@@ -44,7 +50,7 @@ services:
         "--bind",
         "${OPENCLAW_GATEWAY_BIND:-lan}",
         "--port",
-        "${OPENCLAW_GATEWAY_PORT:-18789}",
+        "${OPENCLAW_GATEWAY_PORT:-18789}"
       ]
 
   openclaw-cli:
