@@ -3,6 +3,7 @@ summary: "Use MiniMax M2.1 in OpenClaw"
 read_when:
   - You want MiniMax models in OpenClaw
   - You need MiniMax setup guidance
+title: "MiniMax"
 ---
 
 # MiniMax
@@ -53,7 +54,7 @@ You will be prompted to select an endpoint:
 - **Global** - International users (`api.minimax.io`)
 - **CN** - Users in China (`api.minimaxi.com`)
 
-See [MiniMax OAuth plugin README](https://github.com/moltbot/moltbot/tree/main/extensions/minimax-portal-auth) for details.
+See [MiniMax OAuth plugin README](https://github.com/openclaw/openclaw/tree/main/extensions/minimax-portal-auth) for details.
 
 ### MiniMax M2.1 (API key)
 
